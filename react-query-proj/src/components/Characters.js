@@ -1,41 +1,47 @@
-import React from 'react';
-import { useQuery } from 'react-query';
+import React, { useState } from 'react'
+import { useQuery } from 'react-query'
+import Character from './Character'
 
 export default function Characters() {
-  // const [characters, setCharacters] = useState([]);
-  const fetchCharacters = async () => {
-    const response = await fetch('https://rickandmortyapi.com/api/character');
-    // const data = await response.json();
-    // console.log(data);
-    // setCharacters(data.results);
-    return response.json();
-  };
+  const [page, setPage] = useState(1)
 
-  // useEffect(() => {
-  //   fetchCharacters();
-  // }, [])
-
-  const {data, status} = useQuery('characters', fetchCharacters);
-  console.log(data);
-
-  if (status === 'loading') {
-    return <div>Loading...</div>
+  const fetchCharacters = async ({ queryKey }) => {
+    const response = await fetch(`https://rickandmortyapi.com/api/character?page=${queryKey[1]}`)
+    return response.json()
   }
 
-  if (status === 'error') {
-    return <div>Error</div>
+  const { data, isLoading, isError, error, isPreviousData } = useQuery(['characters', page], fetchCharacters, {
+    keepPreviousData: true,
+  })
+  console.log(data)
+
+  if (isLoading) {
+    return <span>Loading...</span>
+  }
+
+  if (isError) {
+    return <span>Error: {error.message}</span>
   }
 
   return (
-    <div>
-    {/* {characters?.map((character, index) => (
-      // eslint-disable-next-line react/jsx-key
-      <div key={index}>{character.name}</div>
-    ))} */}
-
+    <div className="characters">
       {data.results.map((character, index) => (
-        <div key={index}>{character.name}</div>
+        <Character key={index} character={character} />
       ))}
+      <div>
+        <button
+          disabled={page === 1}
+          onClick={() => setPage((prev) => prev - 1 )}
+        >
+          Previous
+        </button>
+        <button
+          disabled={isPreviousData && !data.info.next}
+          onClick={() => setPage((next) => next + 1 )}
+        >
+          Next
+        </button>
+      </div>
     </div>
-  );
+  )
 }
