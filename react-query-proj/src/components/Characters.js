@@ -10,10 +10,7 @@ export default function Characters() {
     return response.json();
   };
 
-  const { data, isLoading, isError, error, isPreviousData } = useQuery(
-    ['characters', page],
-    fetchCharacters,
-    {
+  const { data, isLoading, isError, error, isPreviousData } = useQuery(['characters', page], fetchCharacters, {
       keepPreviousData: true
     }
   );
